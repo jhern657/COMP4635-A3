@@ -1,6 +1,3 @@
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -18,7 +15,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 		super();
 		this.gameName = gameName;
 		//wordRepo = new WordRepo();
-		
+
 		// Connect to rmi registry
 //	    try {
 ////			wordRepo = (WordRepositoryServer) Naming.lookup("WordRepo");
@@ -33,10 +30,11 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 //			System.exit(0);
 //		}
 	}
-	
-	public boolean checkUsername(String username) throws RemoteException{
+
+	@Override
+    public boolean checkUsername(String username) throws RemoteException{
 		boolean isTaken = gameStates.containsKey(username);
-		
+
 		return isTaken;
 	}
 
@@ -46,6 +44,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 	public synchronized String startGame(String player, int number_of_words, int failed_attempt_factor) throws RemoteException, IllegalArgumentException {
 		String phrase = null;
 
+		try {
 		if(number_of_words > 0 && failed_attempt_factor > 0) {
 			Game game = new Game(number_of_words, failed_attempt_factor);
 			gameStates.put(player, game);
@@ -53,18 +52,15 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 		} else {
 			throw new IllegalArgumentException("Cannot start game with level: " + number_of_words + " and failed attempts: " + failed_attempt_factor);
 		}
+		}
+		catch(Exception e) {
+		    System.out.println("Cannot find player");
+		}
 
 
 		return phrase;
 	}
-	
-//	public void keepMyNameWhileAlive(String name) throws RemoteException {
-//		// If the record for this client does not exist, create and add record
-//		System.out.println("yes");
-//		if (!gameStates.containsKey(name)) {
-//			gameStates.put(name, new Game(name));
-//		}
-//	}
+
 
 	// based on entered character, this will check the game class if letter exist within the phrase.
 	@Override
@@ -76,7 +72,8 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 			game.guess(letter);
 			phrase = game.hidden;
 		} else {
-			throw new IllegalArgumentException("Could not find " + player + ", guess failed");
+
+			throw new IllegalArgumentException("Could not find player: " + player + ", guess failed");
 		}
 
 		return phrase;
@@ -84,7 +81,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 	public Iterator<Map.Entry<String, Game>> getEntrySet() {
 		return this.gameStates.entrySet().iterator();
 	}
-	
+
 	//based on entered string, this will check if the string was guessed correctly else it will decrement the failed attempt factor
 	@Override
 	public synchronized String guessPhrase(String player, String phrase) throws RemoteException, IllegalArgumentException {
@@ -95,7 +92,8 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 			game.guess(phrase);
 			updatedPhrase = game.hidden;
 		} else {
-			throw new IllegalArgumentException("Could not find " + player + ", guess failed");
+
+			throw new IllegalArgumentException("Could not find player" + player + ", guess failed");
 		}
 
 		return updatedPhrase;
@@ -131,7 +129,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 	public synchronized void setGameStates(HashMap<String, Game> gameStates) {
 		this.gameStates = gameStates;
 	}
-	
+
 	//Adds word in the word repository if it doesn't exist yet. Uses the createWord method inside WordRepositoryServer, tells the player if their word was successfully added to the word repository.
 	@Override
 	public String addWord(String clientName, String word) throws RemoteException {
@@ -143,28 +141,30 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 //			status = "Failed to add " + word;
 //		}
 //		return status;
-System.out.println(clientName);
+	    System.out.println(clientName);
 		gameStates.get(clientName).addWord(word);
 		return word;
-	
+
 	}
 
-	public synchronized boolean heartBeat(String name) throws RemoteException {
+	@Override
+    public synchronized boolean heartBeat(String name) throws RemoteException {
 		Game r = gameStates.get(name);
 		if (r != null) {
-			((Game) r).setIsActive(true);
+			r.setIsActive(true);
 		}
 		return false;
 	}
-	
-	public synchronized void keepMyNameWhileAlive(String name) throws RemoteException {
+
+	@Override
+    public synchronized void keepMyNameWhileAlive(String name) throws RemoteException {
 		// If the record for this client does not exist, create and add record
 		if (!gameStates.containsKey(name)) {
 			gameStates.put(name, new Game(name));
 		}
 	}
 
-	
+
 	//Checks if word is in the Word Repository using the removeWord method inside the WordRepositotyServer, tells player if their word was successfully removed from the word repository
 	@Override
 	public String removeWord(String clientName, String word) throws RemoteException {
@@ -198,6 +198,7 @@ System.out.println(clientName);
 		gameStates.get(clientName).checkWord(word);
 		return word;
 	}
+
 	public synchronized void removeEntry(String name) {
 		gameStates.remove(name);
 

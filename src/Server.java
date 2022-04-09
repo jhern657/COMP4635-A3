@@ -9,42 +9,34 @@ import java.util.concurrent.TimeUnit;
 public class Server {
 	private static final int TIMELIMIT_SECONDS = 10;
 	private GameServer gameServer;
-//	public String gameName = "PhraseGuesser";
+
 	public Server(String gameName) {
 		try {
-			
+
 			//Register object with RMI
 			try {
 				LocateRegistry.getRegistry(1099).list();
-				
+
 			} catch(RemoteException e) {
 				LocateRegistry.createRegistry(1099);
 			}
-			
-			 gameServer = new GameServer(gameName); 
-			
+
+			 gameServer = new GameServer(gameName);
+
 			// Create string URL
 			String rmiObjectName = "rmi://localhost/" + gameName;
 			Naming.rebind(gameName, gameServer);
 			System.out.println(gameServer + " is ready!");
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-//	public static void main(String[] argv) {
-//		String gameName = "PhraseGuesser";
-//		
-//		new Server(gameName);
-//		
-//		
-//	}
 
-	
+
 	public static void main(String[] args) throws RemoteException, InterruptedException {
 		if (args.length > 1 || (args.length > 0 && args[0].equalsIgnoreCase("-h"))) {
-//			System.out.println(USAGE);
+
 			System.exit(1);
 		}
 
@@ -73,10 +65,10 @@ public class Server {
 				Map.Entry<String, Game> pair = it.next();
 				String name = pair.getKey();
 				Game r = pair.getValue();
-				if (((Game) r).getIsActive()) {
-					((Game) r).setIsActive(false);
+				if (r.getIsActive()) {
+					r.setIsActive(false);
 					cntAlive++;
-				}		        
+				}
 				else {
 					removeList.add(name);
 					cntDead++;
@@ -87,5 +79,5 @@ public class Server {
 			System.out.println("Removed " + cntDead + ", " + cntAlive + " still alive!");
 		}
 	}
-	
+
 }

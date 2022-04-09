@@ -9,11 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 public class Client implements Runnable{
 	private static final String DEFAULT_CLIENT_NAME = "generic";
-	
+
 	private static final int TIMELIMIT_SECONDS = 5;
-	
-	
-	
+
+
+
     String clientName;
     PhraseGuessingGameServer gameServer;
 
@@ -34,11 +34,6 @@ public class Client implements Runnable{
             gameServer = (PhraseGuessingGameServer) Naming.lookup(clientName);
             gameServer.keepMyNameWhileAlive(clientName);
 
-            // Check if username is available
-//            while(gameServer.checkUsername(this.clientName)) {
-//            	System.out.println("Username unavailable, please use a different one.");
-//            	this.clientName = consoleIn.readLine();
-//            }
             System.out.println(this.clientName);
         } catch (Exception e)
         {
@@ -50,12 +45,9 @@ public class Client implements Runnable{
         System.out.println("Commands: startGame, guessLetter, guessPhrase, endGame, restartGame, addWord, removeWord, checkWord");
         System.out.println("To start game enter: startGame level failedAttempts");
     }
-//    public Client() {
-//		this(DEFAULT_CLIENT_NAME);
-//	}
+
 	public static void main(String[] args) throws RemoteException {
 		if ((args.length > 1) || (args.length > 0 && args[0].equals("-h"))) {
-//			System.out.println(USAGE);
 			System.exit(1);
 		}
 
@@ -64,13 +56,13 @@ public class Client implements Runnable{
 
 		if (args.length > 0) {
 			clientName = args[0];
-			
+
 			// Create a thread to send heart-beats to the server
-			
+
 		 thisClient = new Client(clientName);
-		
+
 			(new Thread(thisClient)).start();
-//			new Client(userName).run();
+
 		} else {
 			 thisClient = new Client(args[0]);
 			(new Thread(thisClient)).start();
@@ -84,17 +76,7 @@ public class Client implements Runnable{
 
 				String userInput = consoleIn.readLine();
 				thisClient.execute(thisClient.parse(userInput));
-				
-		
-////					try {
-//						TimeUnit.SECONDS.sleep(TIMELIMIT_SECONDS);
-//						pggs.heartBeat(userName);
-////					} catch (Exception e) {
-//						e.printStackTrace();
-//						break;
-//					}
-//				
-				
+
 			} catch (Exception re) {
 				System.out.println(re);
 			}
@@ -102,6 +84,7 @@ public class Client implements Runnable{
 	}
 
     // Run the game
+    @Override
     public void run()
     {
         // Main game loop
@@ -111,12 +94,10 @@ public class Client implements Runnable{
             {
                 // Parse input for command parameters
                 // Execute command
-//                String userInput = consoleIn.readLine();
-//                execute(parse(userInput));
             	TimeUnit.SECONDS.sleep(TIMELIMIT_SECONDS);
             	gameServer.heartBeat(clientName);
-            	
-           
+
+
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -128,7 +109,7 @@ public class Client implements Runnable{
         }
     }
 
- 
+
 
     // executes command based on the valid commands a user can enter and calls the
     // appropriate game server method.
@@ -212,7 +193,7 @@ public class Client implements Runnable{
                 break;
             case removeWord:
                 try
-                
+
                 {
                     String clientName = command.getUserName();
 
@@ -329,6 +310,7 @@ public class Client implements Runnable{
         String commandNameString;
         String[] tempPhrase;
         StringBuilder temp2 = new StringBuilder();
+        String[] space;
 
 
         while (tokenizer.hasMoreTokens())
@@ -352,6 +334,9 @@ public class Client implements Runnable{
                     catch(NoSuchElementException e) {
                         return null;
                     }
+                    catch(Exception e) {
+                        return null;
+                    }
                     break;
                 case "guessLetter":
                     try {
@@ -370,12 +355,13 @@ public class Client implements Runnable{
                     {
 
                         commandNameString = tokenizer.nextToken();
+
                         userName = tokenizer.nextToken();
 
                         tempPhrase = userInput.split(" ");
                         int i;
 
-                        for(i =1; i < tempPhrase.length-1; i++) {
+                        for(i =2; i < tempPhrase.length-1; i++) {
                             temp2.append(tempPhrase[i] + " ");
                         }
 
@@ -420,6 +406,9 @@ public class Client implements Runnable{
                     }
                     catch(IllegalArgumentException commandDoesNotExist)
                     {
+                        return null;
+                    }
+                    catch(Exception e) {
                         return null;
                     }
 
