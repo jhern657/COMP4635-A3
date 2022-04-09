@@ -43,7 +43,7 @@ public class Client implements Runnable{
 
         System.out.println("Connected to PhraseGuesser, welcome " + this.clientName);
         System.out.println("Commands: startGame, guessLetter, guessPhrase, endGame, restartGame, addWord, removeWord, checkWord");
-        System.out.println("To start game enter: startGame level failedAttempts");
+        System.out.println("All commands must be followed by: " + this.clientName);
     }
 
 	public static void main(String[] args) throws RemoteException {
@@ -398,6 +398,18 @@ public class Client implements Runnable{
                         return null;
                     }
                     break;
+                case "endGame":
+                	try {
+                        commandNameString = tokenizer.nextToken();
+                        userName = tokenizer.nextToken();
+
+                        commandName = CommandName.valueOf(CommandName.class, commandNameString);
+                        }
+                        catch(Exception e)
+                        {
+                            return null;
+                        }
+                        break;
                 default:
                     try {
                     commandNameString = tokenizer.nextToken();

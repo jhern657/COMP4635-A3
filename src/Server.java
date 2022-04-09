@@ -65,7 +65,7 @@ public class Server {
 				Map.Entry<String, Game> pair = it.next();
 				String name = pair.getKey();
 				Game r = pair.getValue();
-				if (r.getIsActive()) {
+				if (r != null && r.getIsActive()) {
 					r.setIsActive(false);
 					cntAlive++;
 				}

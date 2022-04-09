@@ -8,7 +8,7 @@ import java.util.Map;
 public class GameServer extends UnicastRemoteObject implements PhraseGuessingGameServer {
 	// gamesStates (player, game status)
 	private Map<String,Game> gameStates = new HashMap<>();
-//	WordRepositoryServer wordRepo = new WordRepo();
+	//WordRepositoryServer wordRepo = new WordRepo();
 	String gameName;
 
 	public GameServer(String gameName) throws RemoteException {
@@ -143,7 +143,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 //		return status;
 	    System.out.println(clientName);
 		gameStates.get(clientName).addWord(word);
-		return word;
+		return word + " added succesfully!";
 
 	}
 
@@ -179,7 +179,7 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 		System.out.println(clientName);
 
 		gameStates.get(clientName).removeWord(word);
-		return word;
+		return word + " removed successfully!";
 	}
 
 	//Checks if word is in the word repository using the checkWord method inside the WordRepositoryServer, this tells the user if the word is found.
@@ -194,9 +194,15 @@ public class GameServer extends UnicastRemoteObject implements PhraseGuessingGam
 //		}
 //		return status;
 		System.out.println(clientName);
+		
 
-		gameStates.get(clientName).checkWord(word);
-		return word;
+		boolean found = gameStates.get(clientName).checkWord(word);
+		if (found) {
+			return word + " was found!";
+		}
+		else {
+			return word + " was not found!";
+		}
 	}
 
 	public synchronized void removeEntry(String name) {
